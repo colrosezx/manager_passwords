@@ -1,5 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
+from rest_framework import status
+from rest_framework.response import Response
 
 # Create your models here.
 class Password(models.Model):
@@ -9,12 +11,12 @@ class Password(models.Model):
     def clean(self):
         # Проверка, что пароль не пустой
         if not self.password.strip():
-            raise ValidationError("Password cannot be empty.")
+            raise ValidationError({"password": "Password cannot be empty."})
 
-    def save(self, *args, **kwargs):
-        # Вызов clean для валидации перед сохранением
-        self.full_clean()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Вызов clean для валидации перед сохранением
+    #     self.full_clean()
+    #     super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.service_name
+    # def __str__(self):
+    #     return self.service_name

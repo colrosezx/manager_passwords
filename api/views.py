@@ -10,61 +10,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 
 
 
-# @extend_schema(
-#     request=PasswordSerializer,
-#     responses={201: str, 400: str},
-#     description=""
-# )
-# @api_view(['POST'])
-# def create_or_update_password(request, service_name):
-#     """
-#     Сохраняет или обновляет пароль для указанного сервиса.
-
-#     Параметры:
-#     - service_name (str): Название сервиса (передается в URL).
-#     - password (str): Пароль (передается в теле запроса).
-
-#     Пример тела запроса:
-#     {
-#         "password": "very_secret_pass"
-#     }
-#     """
-#     if request.method == 'POST':
-#         password = request.data.get('password')
-        
-#         if password is None:
-#             return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-#         password_obj, created  = Password.objects.update_or_create(
-#             service_name=service_name,
-#             defaults={'password': password}
-#         )
-        
-#         return Response({
-#             'password': password_obj.password
-#         }, status=status.HTTP_200_OK)
-    
-
-
-# @api_view(['GET'])
-# def get_password(request, service_name):
-#     try:
-#         password = Password.objects.get(service_name=service_name)
-#         serializer = PasswordSerializer(password)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#     except Password.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-
-# @api_view(['GET'])
-# def search_passwords(request):
-#     part_of_service_name = request.query_params.get('service_name', None)
-#     if part_of_service_name:
-#         passwords = Password.objects.filter(service_name__icontains=part_of_service_name)
-#         serializer = PasswordSerializer(passwords, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#     return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
 @extend_schema(
     request=PasswordSerializer,
     responses={
@@ -76,8 +21,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
     },
     description="""
     Создание или обновление пароля для указанного сервиса.
-    - Для создания используйте POST.
-    - Для обновления используйте PUT.
+    - Для создания/изменения пароля используйте POST.
+    - Для поиска пароля по имени севиса используйте GET
     """
 )
 @api_view(['GET', 'POST'])
@@ -112,20 +57,8 @@ def password_handler(request, service_name):
             name='service_name',
             type=str,
             location=OpenApiParameter.QUERY,
-            description="Часть имени сервиса для поиска (например, 'yun').",
+            description="Часть имени сервиса для поиска (например, 'yan').",
             required=True,
-            examples=[
-                OpenApiExample(
-                    'Пример 1',
-                    value='yun',
-                    description="Поиск паролей для сервисов, содержащих 'yun'."
-                ),
-                OpenApiExample(
-                    'Пример 2',
-                    value='google',
-                    description="Поиск паролей для сервисов, содержащих 'google'."
-                ),
-            ],
         ),
     ],
     responses={

@@ -1,1 +1,5 @@
 /myvenv
+
+.coverage
+
+/__pycache__
