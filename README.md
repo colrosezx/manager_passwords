@@ -28,6 +28,12 @@ cd manager_passwords
 
 ### 2. Создайте файл .env
 В корневой директории проекта создайте файл .env и добавьте в него переменные окружения из .env-example.
+Сгенерируйте SERCET_KEY:
+
+```bash
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
 Соберите и запустите контейнеры. В корневой директории проекта выполните команду:
 
 ```bash
