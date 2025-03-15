@@ -48,4 +48,4 @@ docker ps
 
 ### 4. Доступ к приложению
 Откройте браузер и перейдите по адресу:
-http://localhost:8000
+http://localhost:8000/api/swagger
