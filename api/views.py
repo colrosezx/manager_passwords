@@ -2,8 +2,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+
 from .models import Password
-from .serializers import PasswordSerializer
+from .serializers import PasswordSerializer, ServicesAndPasswordsSerializer
 from manager_passwords.utils import password_manager
 
 
@@ -30,7 +31,7 @@ def password_handler(request, service_name):
             encrypted_password = password_instance.password
 
             decrypted_password = password_manager.decrypt_password(encrypted_password)
-            serializer = PasswordSerializer(password_instance)
+            serializer = ServicesAndPasswordsSerializer(password_instance)
             response_data = serializer.data
             response_data['password'] = decrypted_password
 
@@ -51,9 +52,9 @@ def password_handler(request, service_name):
             password_instance.save()
 
             decrypted_password = password_manager.decrypt_password(encrypted_password)
-            serializer = PasswordSerializer(password_instance)
+            serializer = ServicesAndPasswordsSerializer(password_instance)
             response_data = serializer.data
-            response_data['password'] = decrypted_password  # Добавляем расшифрованный пароль в ответ
+            response_data['password'] = decrypted_password
 
             return Response(response_data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
         except Exception as e:
