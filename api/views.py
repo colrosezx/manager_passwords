@@ -20,7 +20,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
         500: "Ошибка сервера"
     },
     description="""
-    Создание или обновление пароля для указанного сервиса.
     - Для создания/изменения пароля используйте POST.
     - Для поиска пароля по имени севиса используйте GET
     """
