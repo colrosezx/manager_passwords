@@ -1,12 +1,10 @@
-import json
-from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from .models import Password
-from .serializers import PasswordSerializer, ServicesAndPasswordsSerializer
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiResponse
+from .serializers import PasswordSerializer
+from manager_passwords.utils import password_manager
 
 
 
@@ -28,20 +26,36 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 def password_handler(request, service_name):
     if request.method == 'GET':
         try:
-            password = Password.objects.get(service_name=service_name)
-            serializer = PasswordSerializer(password)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Password.DoesNotExist:
-            return Response({"detail": "Password not found"}, status=status.HTTP_404_NOT_FOUND)
+            password_instance = Password.objects.get(service_name=service_name)
+            encrypted_password = password_instance.password
+
+            decrypted_password = password_manager.decrypt_password(encrypted_password)
+            serializer = PasswordSerializer(password_instance)
+            response_data = serializer.data
+            response_data['password'] = decrypted_password
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Password.DoesNotExist:  
+            return Response({"detail": "Пароль не найден"}, status=status.HTTP_404_NOT_FOUND)
+
     
     elif request.method == 'POST':
         try:
-            password, created = Password.objects.get_or_create(service_name=service_name)
-            serializer = PasswordSerializer(password, data=request.data, partial=not created)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            password_data = request.data.get('password')
+            if not password_data:
+                return Response({"detail": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            encrypted_password = password_manager.encrypt_password(password_data)
+            password_instance, created = Password.objects.get_or_create(service_name=service_name)
+            password_instance.password = encrypted_password.decode('utf-8')
+            password_instance.save()
+
+            decrypted_password = password_manager.decrypt_password(encrypted_password)
+            serializer = PasswordSerializer(password_instance)
+            response_data = serializer.data
+            response_data['password'] = decrypted_password  # Добавляем расшифрованный пароль в ответ
+
+            return Response(response_data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -91,5 +105,18 @@ def password_search(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    serializer = ServicesAndPasswordsSerializer(passwords, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    decrypted_passwords = []
+    for password_instance in passwords:
+        decrypted_password = password_manager.decrypt_password(password_instance.password)
+        if decrypted_password is not None:
+            decrypted_passwords.append({
+                'service_name': password_instance.service_name,
+                'password': decrypted_password
+            })
+        else:
+            return Response(
+                {"detail": "Ошибка расшифровки одного или нескольких паролей."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    return Response(decrypted_passwords, status=status.HTTP_200_OK)

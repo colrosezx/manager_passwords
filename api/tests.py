@@ -1,9 +1,7 @@
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 from .models import Password
-from .serializers import PasswordSerializer, ServicesAndPasswordsSerializer
 
 
 class PasswordHandlerTests(APITestCase):

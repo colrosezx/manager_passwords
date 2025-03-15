@@ -23,7 +23,6 @@ from api.views import password_search, password_handler
 urlpatterns = [
     path('api/password/<str:service_name>/', password_handler, name='password_handler'),
     path('api/password/', password_search, name='password-search'),
-    # path('api/password/<str:service_name>', create_or_update_password, name='create_or_update_password'),
     path('api/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
