@@ -13,8 +13,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 @extend_schema(
     request=PasswordSerializer,
     responses={
-        201: PasswordSerializer,  # Успешное создание
-        200: PasswordSerializer,  # Успешное обновление
+        201: PasswordSerializer,
+        200: PasswordSerializer,
         400: "Неверные данные",
         404: "Пароль не найден",
         500: "Ошибка сервера"
@@ -28,7 +28,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 @api_view(['GET', 'POST'])
 def password_handler(request, service_name):
     if request.method == 'GET':
-        # Логика для GET-запроса (получение пароля)
         try:
             password = Password.objects.get(service_name=service_name)
             serializer = PasswordSerializer(password)
@@ -37,7 +36,6 @@ def password_handler(request, service_name):
             return Response({"detail": "Password not found"}, status=status.HTTP_404_NOT_FOUND)
     
     elif request.method == 'POST':
-        # Логика для POST
         try:
             password, created = Password.objects.get_or_create(service_name=service_name)
             serializer = PasswordSerializer(password, data=request.data, partial=not created)
@@ -81,23 +79,19 @@ def password_search(request):
     # Получаем параметр `service_name` из запроса
     service_name_part = request.query_params.get('service_name', None)
 
-    # Проверяем, что параметр `service_name` передан
     if not service_name_part:
         return Response(
             {"detail": "Parameter 'service_name' is required."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Ищем пароли, которые содержат часть имени сервиса
     passwords = Password.objects.filter(service_name__icontains=service_name_part)
 
-    # Если пароли не найдены, возвращаем 404
     if not passwords.exists():
         return Response(
             {"detail": "No passwords found for the given service name."},
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Сериализуем найденные пароли
     serializer = ServicesAndPasswordsSerializer(passwords, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
