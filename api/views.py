@@ -44,7 +44,7 @@ def password_handler(request, service_name):
         try:
             password_data = request.data.get('password')
             if not password_data:
-                return Response({"detail": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Необходимо ввести пароль"}, status=status.HTTP_400_BAD_REQUEST)
 
             encrypted_password = password_manager.encrypt_password(password_data)
             password_instance, created = Password.objects.get_or_create(service_name=service_name)
@@ -102,7 +102,7 @@ def password_search(request):
 
     if not passwords.exists():
         return Response(
-            {"detail": "No passwords found for the given service name."},
+            {"detail": "Не найдено паролей для соответствующих сервисов"},
             status=status.HTTP_404_NOT_FOUND
         )
 
