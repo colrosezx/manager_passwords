@@ -34,6 +34,11 @@ cd manager_passwords
 python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 ```
 
+Сгенерируйте KEY_ENCRYPTION:
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
 Соберите и запустите контейнеры. В корневой директории проекта выполните команду:
 
 ```bash
