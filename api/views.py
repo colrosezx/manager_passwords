@@ -76,7 +76,6 @@ def password_search(request):
     Пример запроса:
     GET /password/search/?service_name=yun
     """
-    # Получаем параметр `service_name` из запроса
     service_name_part = request.query_params.get('service_name', None)
 
     if not service_name_part:
